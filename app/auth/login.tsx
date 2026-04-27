@@ -1,20 +1,38 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 // Expo vector icons are usually installed with the standard template
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { AuthService } from '@/services/auth.service';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignIn = () => {
-    // Implement sign in logic
-    console.log('Logging in with:', email, password);
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const res = await AuthService.login(email, password);
+      // If needed, save tokens here natively (e.g. AsyncStorage / SecureStore)
+      Alert.alert('Success', 'Logged in successfully!');
+      
+      // Navigate to onboarding interests selection
+      router.replace('/onboarding/interests');
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message || 'Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,6 +85,7 @@ export default function LoginScreen() {
               title="Sign In" 
               style={styles.signInButton} 
               onPress={handleSignIn} 
+              loading={isLoading}
             />
           </View>
 

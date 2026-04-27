@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { AuthService } from '@/services/auth.service';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -12,13 +13,36 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
-  const handleSignUp = () => {
-    console.log('Signing up with:', { name, email, password });
+  const handleSignUp = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all the fields');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+    if (!agreed) {
+      Alert.alert('Error', 'Please agree to the Terms and Conditions');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await AuthService.signup(name, email, password);
+      Alert.alert('Success', 'Account created successfully!');
+      router.replace('/auth/login');
+    } catch (error: any) {
+      Alert.alert('Signup Failed', error.message || 'Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -112,6 +136,7 @@ export default function SignUpScreen() {
               title="Create Account" 
               style={styles.signUpButton} 
               onPress={handleSignUp} 
+              loading={isLoading}
             />
           </View>
 
