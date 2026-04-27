@@ -1,24 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome to Reliive!</Text>
-    </View>
-  );
+  // Redirect to login page as the entry point
+  return <Redirect href="/auth/login" />;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-});
 
