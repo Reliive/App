@@ -90,7 +90,7 @@ export default function LoginScreen() {
               title="Sign In" 
               style={styles.signInButton} 
               onPress={handleSignIn} 
-              loading={isLoading}
+              isLoading={isLoading}
             />
           </View>
 

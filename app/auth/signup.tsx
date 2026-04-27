@@ -139,7 +139,7 @@ export default function SignUpScreen() {
               title="Create Account" 
               style={styles.signUpButton} 
               onPress={handleSignUp} 
-              loading={isLoading}
+              isLoading={isLoading}
             />
           </View>
 

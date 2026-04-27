@@ -230,7 +230,7 @@ export default function MicroprofileScreen() {
         <Button
           title="Finish Setup"
           onPress={handleFinishSetup}
-          loading={loading}
+          isLoading={loading}
           disabled={loading || !neighborhood}
         />
       </View>
