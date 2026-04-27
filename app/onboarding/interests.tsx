@@ -35,10 +35,14 @@ export default function InterestsScreen() {
     if (selectedInterests.length < 1) return;
     
     console.log('Selected interests:', selectedInterests);
-    // Navigate to microprofile with name param
+    // Navigate to microprofile with name and interests param
+    const selectedLabels = selectedInterests.map(id => INTERESTS.find(i => i.id === id)?.label).filter(Boolean);
     router.push({
       pathname: '/onboarding/microprofile',
-      params: { name: params.name }
+      params: { 
+        name: params.name,
+        interests: JSON.stringify(selectedLabels)
+      }
     });
   };
 

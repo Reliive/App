@@ -14,6 +14,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button } from '@/components/ui/Button';
+import { UserService } from '@/services/user.service';
 
 const NEIGHBORHOODS = [
   { label: 'Downtown', value: 'downtown' },
@@ -67,16 +68,21 @@ export default function MicroprofileScreen() {
     setError('');
 
     try {
-      // TODO: Call API to update profile
-      // await userService.updateProfile({
-      //   name: displayName,
-      //   neighborhood,
-      //   accessibility_prefs: accessibility,
-      // });
+      let parsedInterests = [];
+      try {
+        if (params.interests) {
+          parsedInterests = JSON.parse(params.interests as string);
+        }
+      } catch (e) {}
 
-      Alert.alert('Success', 'Profile completed successfully!');
-      // Navigate to home or next screen
-      // router.replace('/(tabs)');
+      await UserService.updateProfile({
+        name: displayName,
+        neighborhood,
+        accessibility_prefs: accessibility,
+        interests: parsedInterests,
+      });
+
+      router.replace('/(tabs)');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -228,7 +234,7 @@ export default function MicroprofileScreen() {
       {/* Finish Setup Button */}
       <View style={styles.footer}>
         <Button
-          title="Finish Setup"
+          title={loading ? 'Setting up...' : 'Finish Setup'}
           onPress={handleFinishSetup}
           isLoading={loading}
           disabled={loading || !neighborhood}
