@@ -85,9 +85,6 @@ export default function SignUpScreen() {
                   autoCapitalize="none"
                 />
               </View>
-              <TouchableOpacity style={styles.tempMailButton}>
-                <Text style={styles.tempMailText}>Use temp mail</Text>
-              </TouchableOpacity>
             </View>
 
             <Input
