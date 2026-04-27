@@ -37,7 +37,10 @@ export default function SignUpScreen() {
       setIsLoading(true);
       await AuthService.signup(name, email, password);
       Alert.alert('Success', 'Account created successfully!');
-      router.replace('/auth/login');
+      router.replace({
+        pathname: '/auth/login',
+        params: { name }
+      });
     } catch (error: any) {
       Alert.alert('Signup Failed', error.message || 'Something went wrong');
     } finally {

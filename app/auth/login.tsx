@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 // Expo vector icons are usually installed with the standard template
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -10,6 +10,7 @@ import { AuthService } from '@/services/auth.service';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,11 @@ export default function LoginScreen() {
       Alert.alert('Success', 'Logged in successfully!');
       
       // Navigate to onboarding interests selection
-      router.replace('/onboarding/interests');
+      const userName = res.user?.name || params.name || '';
+      router.replace({
+        pathname: '/onboarding/interests',
+        params: { name: userName }
+      });
     } catch (error: any) {
       Alert.alert('Login Failed', error.message || 'Something went wrong');
     } finally {

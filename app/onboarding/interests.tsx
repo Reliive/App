@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 
 const INTERESTS = [
@@ -16,6 +18,9 @@ const INTERESTS = [
 ];
 
 export default function InterestsScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
   const toggleInterest = (id: string) => {
@@ -30,13 +35,16 @@ export default function InterestsScreen() {
     if (selectedInterests.length < 1) return;
     
     console.log('Selected interests:', selectedInterests);
-    // Proceed to next step: main app or tabs
-    // router.replace('/(tabs)');
+    // Navigate to microprofile with name param
+    router.push({
+      pathname: '/onboarding/microprofile',
+      params: { name: params.name }
+    });
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
         <Text style={styles.title}>What are you into?</Text>
         <Text style={styles.subtitle}>Pick at least 1 interest</Text>
 
