@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,11 +9,13 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserService } from '@/services/user.service';
 import { EventService } from '@/services/event.service';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 const { width } = Dimensions.get('window');
 
@@ -30,27 +32,27 @@ export default function HomeScreen() {
   const [featuredEvents, setFeaturedEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [profileRes, eventsRes, featuredRes] = await Promise.all([
-          UserService.getMe().catch(() => null),
-          EventService.listEvents({ upcoming: 'true', limit: 5 }).catch(() => ({ data: [] })),
-          EventService.getFeaturedExperiences().catch(() => ({ data: [] })),
-        ]);
+  const fetchData = useCallback(async () => {
+    try {
+      const [profileRes, eventsRes, featuredRes] = await Promise.all([
+        UserService.getMe().catch(() => null),
+        EventService.listEvents({ upcoming: 'true', limit: 5 }).catch(() => ({ data: [] })),
+        EventService.getFeaturedExperiences().catch(() => ({ data: [] })),
+      ]);
 
-        if (profileRes?.data) setUser(profileRes.data);
-        if (eventsRes?.data) setUpcomingEvents(eventsRes.data);
-        if (featuredRes?.data) setFeaturedEvents(featuredRes.data);
-      } catch (error) {
-        console.error('Failed to fetch home data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      if (profileRes?.data) setUser(profileRes.data);
+      if (eventsRes?.data) setUpcomingEvents(eventsRes.data);
+      if (featuredRes?.data) setFeaturedEvents(featuredRes.data);
+    } catch (error) {
+      console.error('Failed to fetch home data:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
+
+  const { refreshing, onRefresh } = usePullToRefresh(fetchData);
 
   const clubs = user?.clubs?.length > 0 ? user.clubs : FALLBACK_CLUBS;
 
@@ -64,7 +66,18 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={{ paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor="#4F46E5" // iOS spinner color
+            colors={['#4F46E5']} // Android spinner colors
+          />
+        }
+      >
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <View>
