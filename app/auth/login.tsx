@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, S
 import { useRouter, useLocalSearchParams } from 'expo-router';
 // Expo vector icons are usually installed with the standard template
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +11,7 @@ import { AuthService } from '@/services/auth.service';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,7 +50,7 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
             <View style={styles.logoPlaceholder}>
               <Image 
                 source={require('../../assets/images/relive.png')} 

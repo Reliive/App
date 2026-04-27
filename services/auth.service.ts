@@ -48,4 +48,17 @@ export const AuthService = {
       throw new Error(message);
     }
   },
+
+  async logout() {
+    try {
+      const response = await api.post('/auth/logout');
+      setAuthToken(null);
+      return response.data;
+    } catch (error: any) {
+      // Even if backend fails, clear local token to force logout
+      setAuthToken(null);
+      const message = error.response?.data?.message || error.message || 'Logout failed';
+      throw new Error(message);
+    }
+  },
 };

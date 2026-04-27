@@ -27,9 +27,13 @@ export default function SettingsScreen() {
         text: 'Log Out', 
         style: 'destructive',
         onPress: async () => {
-          // In a real app, you would call backend logout endpoint here
-          setAuthToken(null);
-          router.replace('/auth/login');
+          try {
+            await AuthService.logout();
+            router.replace('/auth/login');
+          } catch (error: any) {
+            // Even if it fails (e.g. network error), we still want to log them out locally
+            router.replace('/auth/login');
+          }
         }
       },
     ]);
@@ -46,8 +50,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Call the backend API
-              // await UserService.deleteMe(); // We would need to implement this in UserService
+              await UserService.deleteMe();
               setAuthToken(null);
               Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
               router.replace('/auth/signup');

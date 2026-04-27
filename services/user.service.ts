@@ -31,4 +31,14 @@ export const UserService = {
       throw new Error(message);
     }
   },
+
+  async deleteMe() {
+    try {
+      const response = await api.delete('/users/me');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to delete account';
+      throw new Error(message);
+    }
+  },
 };
