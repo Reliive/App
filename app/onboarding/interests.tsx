@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
+
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const INTERESTS = [
   { id: '1', label: 'Travel', icon: '✈️' },
@@ -21,7 +23,28 @@ export default function InterestsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  // Initialize selected interests from existing ones if provided
+  const initialSelectedIds = useMemo(() => {
+    if (!params.existingInterests) return [];
+    try {
+      const labels = JSON.parse(params.existingInterests as string);
+      return INTERESTS
+        .filter(i => labels.includes(i.label))
+        .map(i => i.id);
+    } catch (e) {
+      return [];
+    }
+  }, [params.existingInterests]);
+
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(initialSelectedIds);
+
+  // Update selection if initialSelectedIds changes (e.g. on navigation)
+  useEffect(() => {
+    if (initialSelectedIds.length > 0) {
+      setSelectedInterests(initialSelectedIds);
+    }
+  }, [initialSelectedIds]);
 
   const toggleInterest = (id: string) => {
     setSelectedInterests(prev => 
@@ -31,10 +54,18 @@ export default function InterestsScreen() {
     );
   };
 
+  const hasChanged = useMemo(() => {
+    if (selectedInterests.length !== initialSelectedIds.length) return true;
+    const sortedInitial = [...initialSelectedIds].sort();
+    const sortedCurrent = [...selectedInterests].sort();
+    return sortedInitial.some((val, index) => val !== sortedCurrent[index]);
+  }, [selectedInterests, initialSelectedIds]);
+
+  const isButtonDisabled = selectedInterests.length < 1 || (params.existingInterests ? !hasChanged : false);
+
   const handleContinue = () => {
-    if (selectedInterests.length < 1) return;
+    if (isButtonDisabled) return;
     
-    console.log('Selected interests:', selectedInterests);
     // Navigate to microprofile with name and interests param
     const selectedLabels = selectedInterests.map(id => INTERESTS.find(i => i.id === id)?.label).filter(Boolean);
     router.push({
@@ -49,6 +80,9 @@ export default function InterestsScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#111827" />
+        </TouchableOpacity>
         <Text style={styles.title}>What are you into?</Text>
         <Text style={styles.subtitle}>Pick at least 1 interest</Text>
 
@@ -80,8 +114,8 @@ export default function InterestsScreen() {
         <Button 
           title="Continue →" 
           onPress={handleContinue}
-          disabled={selectedInterests.length < 1}
-          style={selectedInterests.length < 1 ? styles.disabledButton : null}
+          disabled={isButtonDisabled}
+          style={isButtonDisabled ? styles.disabledButton : null}
         />
       </View>
     </SafeAreaView>
@@ -95,8 +129,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 12,
     paddingBottom: 40,
+  },
+  backButton: {
+    marginBottom: 20,
+    marginLeft: -4,
   },
   title: {
     fontSize: 28,

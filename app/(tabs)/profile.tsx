@@ -148,7 +148,13 @@ export default function ProfileScreen() {
           </View>
           <TouchableOpacity 
             style={styles.editInterestsButton}
-            onPress={() => router.push('/onboarding/interests')}
+            onPress={() => router.push({
+              pathname: '/onboarding/interests',
+              params: { 
+                name: user?.name,
+                existingInterests: JSON.stringify(user?.interests || []) 
+              }
+            })}
           >
             <Text style={styles.editInterestsText}>Edit →</Text>
           </TouchableOpacity>
