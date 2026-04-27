@@ -19,5 +19,15 @@ export const EventService = {
       const message = error.response?.data?.message || error.message || 'Failed to get featured experiences';
       throw new Error(message);
     }
+  },
+
+  async getMyEvents() {
+    try {
+      const response = await api.get('/events/my');
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to get my events';
+      throw new Error(message);
+    }
   }
 };
