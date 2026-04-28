@@ -82,7 +82,7 @@ export default function MicroprofileScreen() {
         interests: parsedInterests,
       });
 
-      router.replace('/');
+      router.replace('/(tabs)');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {

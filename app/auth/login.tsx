@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { AuthService } from '@/services/auth.service';
+import { UserService } from '@/services/user.service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -16,6 +18,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const { signIn } = useAuth();
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -26,15 +30,26 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
       const res = await AuthService.login(email, password);
-      // If needed, save tokens here natively (e.g. AsyncStorage / SecureStore)
-      Alert.alert('Success', 'Logged in successfully!');
       
-      // Navigate to onboarding interests selection
-      const userName = res.user?.name || params.name || '';
-      router.replace({
-        pathname: '/onboarding/interests',
-        params: { name: userName }
-      });
+      // Persist token globally
+      if (res.data?.session?.access_token) {
+        await signIn(res.data.session.access_token);
+      }
+
+      // Fetch user profile to check onboarding status
+      const profileRes = await UserService.getMe();
+      const isOnboarded = profileRes?.data?.onboarding_completed;
+
+      if (isOnboarded) {
+        router.replace('/(tabs)');
+      } else {
+        // Navigate to onboarding interests selection
+        const userName = profileRes?.data?.name || res.data?.user?.name || params.name || '';
+        router.replace({
+          pathname: '/onboarding/interests',
+          params: { name: userName }
+        });
+      }
     } catch (error: any) {
       Alert.alert('Login Failed', error.message || 'Something went wrong');
     } finally {

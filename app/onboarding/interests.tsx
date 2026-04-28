@@ -80,9 +80,13 @@ export default function InterestsScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#111827" />
-        </TouchableOpacity>
+        {params.existingInterests ? (
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color="#111827" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ height: 20 }} /> // Spacer to keep layout consistent
+        )}
         <Text style={styles.title}>What are you into?</Text>
         <Text style={styles.subtitle}>Pick at least 1 interest</Text>
 

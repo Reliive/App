@@ -14,11 +14,14 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthService, setAuthToken } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -29,10 +32,10 @@ export default function SettingsScreen() {
         onPress: async () => {
           try {
             await AuthService.logout();
-            router.replace('/auth/login');
           } catch (error: any) {
-            // Even if it fails (e.g. network error), we still want to log them out locally
-            router.replace('/auth/login');
+            console.error('Logout error:', error);
+          } finally {
+            await signOut();
           }
         }
       },
@@ -51,9 +54,8 @@ export default function SettingsScreen() {
           onPress: async () => {
             try {
               await UserService.deleteMe();
-              setAuthToken(null);
+              await signOut();
               Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
-              router.replace('/auth/signup');
             } catch (error: any) {
               Alert.alert('Error', error.message || 'Failed to delete account');
             }
