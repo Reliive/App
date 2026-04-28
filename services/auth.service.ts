@@ -51,7 +51,7 @@ export const AuthService = {
 
   async logout() {
     try {
-      const response = await api.post('/auth/logout');
+      const response = await api.delete('/auth/logout');
       setAuthToken(null);
       return response.data;
     } catch (error: any) {

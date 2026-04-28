@@ -14,7 +14,8 @@ export function useExitAppOnBack() {
         '/explore', 
         '/host', 
         '/events', 
-        '/profile'
+        '/profile',
+        '/auth/login'
       ].includes(pathname);
 
       if (isRootScreen) {

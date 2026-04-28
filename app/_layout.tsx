@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
+import { useExitAppOnBack } from '@/hooks/useExitAppOnBack';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -17,6 +18,9 @@ function RootLayoutNav() {
   
   // Enforce the auth guard
   useProtectedRoute();
+  
+  // Enforce back button interception globally
+  useExitAppOnBack();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
