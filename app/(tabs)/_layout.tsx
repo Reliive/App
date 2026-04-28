@@ -2,9 +2,11 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useExitAppOnBack } from '@/hooks/useExitAppOnBack';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  useExitAppOnBack();
 
   return (
     <Tabs

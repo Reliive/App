@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthService, setAuthToken } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { showLogoutDialog, showDeleteAccountDialog } from '@/dialogs/ConfirmationDialogs';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -24,45 +25,27 @@ export default function SettingsScreen() {
   const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { 
-        text: 'Log Out', 
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await AuthService.logout();
-          } catch (error: any) {
-            console.error('Logout error:', error);
-          } finally {
-            await signOut();
-          }
-        }
-      },
-    ]);
+    showLogoutDialog(async () => {
+      try {
+        await AuthService.logout();
+      } catch (error: any) {
+        console.error('Logout error:', error);
+      } finally {
+        await signOut();
+      }
+    });
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action is permanent and cannot be undone. All your data will be erased.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await UserService.deleteMe();
-              await signOut();
-              Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete account');
-            }
-          }
-        },
-      ]
-    );
+    showDeleteAccountDialog(async () => {
+      try {
+        await UserService.deleteMe();
+        await signOut();
+        Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to delete account');
+      }
+    });
   };
 
   const renderSettingRow = (icon: any, title: string, showChevron: boolean = true, rightComponent?: React.ReactNode, onPress?: () => void) => (
