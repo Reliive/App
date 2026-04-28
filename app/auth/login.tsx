@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Image, Alert, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 // Expo vector icons are usually installed with the standard template
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ export default function LoginScreen() {
   const params = useLocalSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const { signIn } = useAuth();
@@ -95,8 +96,17 @@ export default function LoginScreen() {
               placeholder="•••••••••••••"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureTextEntry={!isPasswordVisible}
               icon={<MaterialCommunityIcons name="lock-outline" size={24} color="#9CA3AF" />}
+              rightIcon={
+                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                  <MaterialCommunityIcons 
+                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"} 
+                    size={24} 
+                    color="#9CA3AF" 
+                  />
+                </TouchableOpacity>
+              }
             />
 
             <TouchableOpacity style={styles.forgotPassword} onPress={() => {}}>
@@ -125,7 +135,7 @@ export default function LoginScreen() {
 }
 
 // Added this since we need it for the links inline
-import { TouchableOpacity } from 'react-native';
+// import { TouchableOpacity } from 'react-native'; (Moved to top)
 
 const styles = StyleSheet.create({
   safeArea: {

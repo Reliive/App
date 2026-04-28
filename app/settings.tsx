@@ -81,7 +81,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>ACCOUNT</Text>
           <View style={styles.card}>
-            {renderSettingRow('account-outline', 'Edit Profile', true, null, () => router.push('/edit-profile'))}
+            {renderSettingRow('account-outline', 'Edit Profile', true, null, () => router.push('/profile/edit'))}
             <View style={styles.divider} />
             {renderSettingRow('bell-outline', 'Notifications', true, null, () => {})}
             <View style={styles.divider} />
