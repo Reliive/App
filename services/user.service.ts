@@ -1,5 +1,14 @@
 import { api } from './auth.service';
 
+export interface UpdateProfileData {
+  name?: string;
+  avatar_url?: string;
+  neighborhood?: string;
+  accessibility_prefs?: Record<string, boolean>;
+  emergency_contact?: Record<string, string>;
+  interests?: string[];
+}
+
 export const UserService = {
   async getMe() {
     try {
@@ -11,7 +20,7 @@ export const UserService = {
     }
   },
 
-  async updateProfile(profileData: any) {
+  async updateProfile(profileData: UpdateProfileData) {
     try {
       const { interests, ...otherData } = profileData;
       

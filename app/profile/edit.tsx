@@ -17,15 +17,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserService } from '@/services/user.service';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import LocationPicker from '@/components/LocationPicker';
+import type { LocationData } from '@/services/location.service';
 
-const NEIGHBORHOODS = [
-  { label: 'Koramangala', value: 'Koramangala' },
-  { label: 'Indiranagar', value: 'Indiranagar' },
-  { label: 'HSR Layout', value: 'HSR Layout' },
-  { label: 'Jayanagar', value: 'Jayanagar' },
-  { label: 'Alambagh', value: 'Alambagh' },
-  { label: 'Whitefield', value: 'Whitefield' },
-];
+// Removed static NEIGHBORHOODS as we use GPS now
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -35,7 +30,7 @@ export default function EditProfileScreen() {
   const [user, setUser] = useState<any>(null);
   
   const [name, setName] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
   useEffect(() => {
@@ -45,7 +40,7 @@ export default function EditProfileScreen() {
         if (res?.data) {
           setUser(res.data);
           setName(res.data.name || '');
-          setNeighborhood(res.data.neighborhood || '');
+          setCurrentLocation(res.data.location_name || res.data.neighborhood || null);
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
@@ -67,7 +62,6 @@ export default function EditProfileScreen() {
       setSaving(true);
       await UserService.updateProfile({
         name: name.trim(),
-        neighborhood,
       });
       Alert.alert('Success', 'Profile updated successfully');
       router.back();
@@ -134,26 +128,19 @@ export default function EditProfileScreen() {
           />
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Neighborhood</Text>
-            <View style={styles.neighborhoodContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.neighborhoodScroll}>
-                {NEIGHBORHOODS.map((n) => (
-                  <TouchableOpacity 
-                    key={n.value}
-                    style={[
-                      styles.neighborhoodChip, 
-                      neighborhood === n.value && styles.neighborhoodChipActive
-                    ]}
-                    onPress={() => setNeighborhood(n.value)}
-                  >
-                    <Text style={[
-                      styles.neighborhoodText,
-                      neighborhood === n.value && styles.neighborhoodTextActive
-                    ]}>{n.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+            <Text style={styles.label}>Location</Text>
+            {currentLocation && (
+              <View style={styles.currentLocationBox}>
+                <MaterialCommunityIcons name="map-marker" size={18} color="#4F46E5" />
+                <Text style={styles.currentLocationText}>{currentLocation}</Text>
+              </View>
+            )}
+            <LocationPicker 
+              onLocationSet={(data) => {
+                setCurrentLocation(data.location_name);
+                // The backend is already updated by the picker
+              }} 
+            />
           </View>
 
           <Button 
@@ -280,32 +267,19 @@ const styles = StyleSheet.create({
   inputGroup: {
     marginBottom: 8,
   },
-  neighborhoodContainer: {
-    marginTop: 8,
-  },
-  neighborhoodScroll: {
-    flexGrow: 0,
-  },
-  neighborhoodChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  currentLocationBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    padding: 12,
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    marginRight: 10,
-    backgroundColor: '#FFFFFF',
+    marginBottom: 12,
   },
-  neighborhoodChipActive: {
-    borderColor: '#4F46E5',
-    backgroundColor: '#EEF2FF',
-  },
-  neighborhoodText: {
+  currentLocationText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#4B5563',
-  },
-  neighborhoodTextActive: {
-    color: '#4F46E5',
+    color: '#374151',
+    marginLeft: 8,
+    flex: 1,
   },
   saveButton: {
     marginTop: 20,

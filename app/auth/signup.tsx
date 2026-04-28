@@ -26,6 +26,10 @@ export default function SignUpScreen() {
       Alert.alert('Error', 'Please fill all the fields');
       return;
     }
+    if (password.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters long');
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -93,6 +97,7 @@ export default function SignUpScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              error={password.length > 0 && password.length < 8 ? 'Password too short (min 8 characters)' : undefined}
               rightIcon={
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   <MaterialCommunityIcons 

@@ -15,22 +15,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button } from '@/components/ui/Button';
 import { UserService } from '@/services/user.service';
-
-const NEIGHBORHOODS = [
-  { label: 'Downtown', value: 'downtown' },
-  { label: 'Uptown', value: 'uptown' },
-  { label: 'Midtown', value: 'midtown' },
-  { label: 'Suburb', value: 'suburb' },
-  { label: 'Other', value: 'other' },
-];
+import LocationPicker from '@/components/LocationPicker';
+import type { LocationData } from '@/services/location.service';
 
 export default function MicroprofileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const [displayName, setDisplayName] = useState((params.name as string) || '');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [showNeighborhoodDropdown, setShowNeighborhoodDropdown] = useState(false);
+  const [locationSet, setLocationSet] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -52,15 +45,15 @@ export default function MicroprofileScreen() {
     }));
   };
 
-  const handleSelectNeighborhood = (value: string) => {
-    setNeighborhood(value);
-    setShowNeighborhoodDropdown(false);
+  const handleLocationSet = (location: LocationData) => {
+    // Location is already saved to backend by LocationPicker component
+    setLocationSet(true);
     setError('');
   };
 
   const handleFinishSetup = async () => {
-    if (!neighborhood) {
-      setError('Please select a neighborhood');
+    if (!locationSet) {
+      setError('Please set your location');
       return;
     }
 
@@ -68,7 +61,7 @@ export default function MicroprofileScreen() {
     setError('');
 
     try {
-      let parsedInterests = [];
+      let parsedInterests: string[] = [];
       try {
         if (params.interests) {
           parsedInterests = JSON.parse(params.interests as string);
@@ -77,7 +70,6 @@ export default function MicroprofileScreen() {
 
       await UserService.updateProfile({
         name: displayName,
-        neighborhood,
         accessibility_prefs: accessibility,
         interests: parsedInterests,
       });
@@ -90,13 +82,14 @@ export default function MicroprofileScreen() {
     }
   };
 
-  const selectedNeighborhoodLabel = NEIGHBORHOODS.find(
-    n => n.value === neighborhood
-  )?.label || 'Select Neighborhood';
-
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -152,52 +145,13 @@ export default function MicroprofileScreen() {
             </View>
           </View>
 
-          {/* Neighborhood Dropdown */}
+          {/* Location — GPS-based picker (replaces old dropdown) */}
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Neighborhood</Text>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              onPress={() => setShowNeighborhoodDropdown(!showNeighborhoodDropdown)}
-            >
-              <Text
-                style={[
-                  styles.dropdownText,
-                  !neighborhood && styles.dropdownPlaceholder,
-                ]}
-              >
-                {selectedNeighborhoodLabel}
-              </Text>
-              <MaterialCommunityIcons
-                name={showNeighborhoodDropdown ? 'chevron-up' : 'chevron-down'}
-                size={20}
-                color="#6B7280"
-              />
-            </TouchableOpacity>
-
-            {/* Dropdown Menu */}
-            {showNeighborhoodDropdown ? (
-              <View style={styles.dropdownMenu}>
-                {NEIGHBORHOODS.map((item) => (
-                  <TouchableOpacity
-                    key={item.value}
-                    style={[
-                      styles.dropdownItem,
-                      neighborhood === item.value && styles.dropdownItemSelected,
-                    ]}
-                    onPress={() => handleSelectNeighborhood(item.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        neighborhood === item.value && styles.dropdownItemTextSelected,
-                      ]}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ) : null}
+            <Text style={styles.label}>Location</Text>
+            <LocationPicker
+              onLocationSet={handleLocationSet}
+              errorMessage={!locationSet && error.includes('location') ? error : undefined}
+            />
           </View>
         </View>
 
@@ -237,7 +191,7 @@ export default function MicroprofileScreen() {
           title={loading ? 'Setting up...' : 'Finish Setup'}
           onPress={handleFinishSetup}
           isLoading={loading}
-          disabled={loading || !neighborhood}
+          disabled={loading || !locationSet}
         />
       </View>
     </SafeAreaView>
@@ -350,55 +304,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: '#111827',
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: '#111827',
-    fontWeight: '500',
-  },
-  dropdownPlaceholder: {
-    color: '#9CA3AF',
-  },
-  dropdownMenu: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    marginTop: 4,
-    zIndex: 10,
-    elevation: 5,
-  },
-  dropdownItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  dropdownItemSelected: {
-    backgroundColor: '#EEF2FF',
-  },
-  dropdownItemText: {
-    fontSize: 15,
-    color: '#111827',
-  },
-  dropdownItemTextSelected: {
-    color: '#4F46E5',
-    fontWeight: '600',
   },
   accessibilitySection: {
     marginHorizontal: 24,
