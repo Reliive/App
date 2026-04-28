@@ -39,22 +39,16 @@ export default function LocationPicker({ onLocationSet, errorMessage }: Location
         return;
       }
 
-      // 2. Try Last Known Position (Instant)
+      // 2. Get fresh, accurate GPS coordinates
       setState('fetching');
-      let position = await ExpoLocation.getLastKnownPositionAsync();
-
-      // 3. If last known is missing or too old (older than 10 mins), get fresh
-      const isOld = position && (Date.now() - position.timestamp > 10 * 60 * 1000);
-      
-      if (!position || isOld) {
-        position = await ExpoLocation.getCurrentPositionAsync({
-          accuracy: ExpoLocation.Accuracy.Low,
-        });
-      }
+      const position = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.High,
+        timeInterval: 5000,
+      });
 
       const { latitude, longitude } = position.coords;
 
-      // 4. Send to backend
+      // 3. Send to backend (reverse geocoding + PostGIS save)
       setState('saving');
       const locationData = await LocationService.updateLocation(latitude, longitude);
 

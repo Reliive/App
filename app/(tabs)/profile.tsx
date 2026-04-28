@@ -58,7 +58,7 @@ export default function ProfileScreen() {
   }
 
   const name = user?.name || 'User';
-  const neighborhood = user?.neighborhood || 'Not specified';
+  const location = user?.location_name || user?.neighborhood || 'Location not set';
   const eventsAttended = user?.stats?.events_attended || 0;
   const eventsHosted = user?.stats?.events_hosted || 0;
   // Calculate points as a dummy metric since it's not in the API
@@ -95,7 +95,7 @@ export default function ProfileScreen() {
             )}
           </View>
           <Text style={styles.nameText}>{name}</Text>
-          <Text style={styles.locationText}>📍 {neighborhood}</Text>
+          <Text style={styles.locationText}>📍 {location}</Text>
         </View>
 
         {/* Stats */}

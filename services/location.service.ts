@@ -3,6 +3,7 @@ import { api } from './auth.service';
 export interface LocationData {
   latitude: number;
   longitude: number;
+  location_locality: string | null;
   location_city: string | null;
   location_state: string | null;
   location_country: string | null;
