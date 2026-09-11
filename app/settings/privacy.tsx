@@ -20,7 +20,7 @@ export default function PrivacyScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconCircle}>
-          <MaterialCommunityIcons name="lock-shield-outline" size={48} color="#6366F1" />
+          <MaterialCommunityIcons name="shield-lock-outline" size={48} color="#6366F1" />
         </View>
         <Text style={styles.title}>Your Privacy Matters</Text>
         <Text style={styles.subtitle}>
