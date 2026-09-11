@@ -83,9 +83,9 @@ export default function SettingsScreen() {
           <View style={styles.card}>
             {renderSettingRow('account-outline', 'Edit Profile', true, null, () => router.push('/profile/edit'))}
             <View style={styles.divider} />
-            {renderSettingRow('bell-outline', 'Notifications', true, null, () => {})}
+            {renderSettingRow('bell-outline', 'Notifications', true, null, () => router.push('/notifications' as any))}
             <View style={styles.divider} />
-            {renderSettingRow('lock-outline', 'Privacy', true, null, () => {})}
+            {renderSettingRow('lock-outline', 'Privacy', true, null, () => router.push('/settings/privacy' as any))}
           </View>
         </View>
 
@@ -93,7 +93,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>ACCESSIBILITY</Text>
           <View style={styles.card}>
-            {renderSettingRow('format-size', 'Text Size', true, null, () => {})}
+            {renderSettingRow('format-size', 'Text Size', true, null, () => Alert.alert('Text Size', 'Dynamic font scaling is enabled by default.'))}
             <View style={styles.divider} />
             {renderSettingRow(
               'moon-waning-crescent', 
@@ -113,11 +113,11 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>SUPPORT</Text>
           <View style={styles.card}>
-            {renderSettingRow('help-circle-outline', 'Help & FAQ', true, null, () => {})}
+            {renderSettingRow('help-circle-outline', 'Help & FAQ', true, null, () => router.push('/settings/help' as any))}
             <View style={styles.divider} />
-            {renderSettingRow('email-outline', 'Contact Us', true, null, () => {})}
+            {renderSettingRow('email-outline', 'Contact Us', true, null, () => router.push('/settings/contact' as any))}
             <View style={styles.divider} />
-            {renderSettingRow('file-document-outline', 'Terms & Privacy', true, null, () => {})}
+            {renderSettingRow('file-document-outline', 'Terms & Privacy', true, null, () => router.push('/settings/terms' as any))}
           </View>
         </View>
 

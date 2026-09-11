@@ -32,6 +32,10 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding/microprofile" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/privacy" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/help" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/contact" options={{ headerShown: false }} />
+        <Stack.Screen name="settings/terms" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]/manage" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]/index" options={{ headerShown: false }} />
         <Stack.Screen name="notifications/index" options={{ headerShown: false }} />
