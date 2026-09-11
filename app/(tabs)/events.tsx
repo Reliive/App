@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventService } from '@/services/event.service';
@@ -15,22 +15,31 @@ export default function EventsScreen() {
     attending: { upcoming: any[], past: any[] }
   } | null>(null);
 
-  useEffect(() => {
-    const fetchMyEvents = async () => {
-      try {
-        setLoading(true);
-        const res = await EventService.getMyEvents();
-        if (res?.data) {
-          setData(res.data);
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+      const fetchMyEvents = async () => {
+        try {
+          const res = await EventService.getMyEvents();
+          if (res?.data && isMounted) {
+            setData(res.data);
+          }
+        } catch (error) {
+          console.error('Failed to load my events', error);
+        } finally {
+          if (isMounted) {
+            setLoading(false);
+          }
         }
-      } catch (error) {
-        console.error('Failed to load my events', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMyEvents();
-  }, []);
+      };
+
+      fetchMyEvents();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [])
+  );
 
   const renderAttendingEvent = (event: any) => {
     const date = new Date(event.starts_at);
