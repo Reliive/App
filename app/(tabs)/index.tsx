@@ -17,6 +17,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserService } from '@/services/user.service';
 import { EventService } from '@/services/event.service';
+import { NotificationService } from '@/services/notification.service';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 const { width } = Dimensions.get('window');
@@ -33,19 +34,24 @@ export default function HomeScreen() {
   const [user, setUser] = useState<any>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [featuredEvents, setFeaturedEvents] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
-      const [profileRes, eventsRes, featuredRes] = await Promise.all([
+      const [profileRes, eventsRes, featuredRes, notifRes] = await Promise.all([
         UserService.getMe().catch(() => null),
         EventService.listEvents({ upcoming: 'true', limit: 5 }).catch(() => ({ data: [] })),
         EventService.getFeaturedExperiences().catch(() => ({ data: [] })),
+        NotificationService.getNotifications().catch(() => null),
       ]);
 
       if (profileRes?.data) setUser(profileRes.data);
       if (eventsRes?.data) setUpcomingEvents(eventsRes.data);
       if (featuredRes?.data) setFeaturedEvents(featuredRes.data);
+      if (notifRes?.data) {
+        setUnreadCount(notifRes.data.unread_count || 0);
+      }
     } catch (error) {
       console.error('Failed to fetch home data:', error);
     }
@@ -136,8 +142,9 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>👋 Hi, {user?.name?.split(' ')[0] || 'User'}!</Text>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/notifications' as any)}>
               <MaterialCommunityIcons name="bell-outline" size={24} color="#111827" />
+              {unreadCount > 0 && <View style={styles.bellBadgeDot} />}
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/settings' as any)}>
               <MaterialCommunityIcons name="cog-outline" size={24} color="#111827" />
@@ -256,8 +263,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   iconButton: {
+    position: 'relative',
     marginLeft: 16,
     padding: 4,
+  },
+  bellBadgeDot: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
   },
   section: {
     marginTop: 24,
