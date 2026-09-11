@@ -460,8 +460,9 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   hostSubtext: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: 14,
+    color: '#4B5563',
+    fontWeight: '500',
     marginTop: 2,
   },
   descriptionText: {
