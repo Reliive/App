@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventService } from '@/services/event.service';
-import { showUpcomingFeatureDialog } from '@/dialogs/ConfirmationDialogs';
 
 export default function EventsScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,7 @@ export default function EventsScreen() {
           <View style={{ flex: 1 }} />
           <TouchableOpacity 
             style={styles.actionBtn}
-            onPress={() => showUpcomingFeatureDialog('Manage Event', `Event management features for "${event.title}" will be available in an upcoming update.`)}
+            onPress={() => router.push(`/events/${event.id}/manage` as any)}
           >
             <Text style={styles.actionBtnText}>Manage →</Text>
           </TouchableOpacity>

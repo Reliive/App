@@ -39,5 +39,56 @@ export const EventService = {
       const message = error.response?.data?.message || error.message || 'Failed to create event';
       throw new Error(message);
     }
+  },
+
+  async getEventDetails(id: string) {
+    try {
+      const response = await api.get(`/events/${id}`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to get event details';
+      throw new Error(message);
+    }
+  },
+
+  async getEventAttendees(id: string) {
+    try {
+      const response = await api.get(`/events/${id}/attendees`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to get attendees';
+      throw new Error(message);
+    }
+  },
+
+  async checkInAttendee(id: string, userId?: string) {
+    try {
+      const response = await api.post(`/events/${id}/checkin`, { user_id: userId });
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Check-in failed';
+      throw new Error(message);
+    }
+  },
+
+  async cancelEvent(id: string, reason?: string) {
+    try {
+      const response = await api.delete(`/events/${id}`, { data: { reason } });
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to cancel event';
+      throw new Error(message);
+    }
+  },
+
+  async updateEvent(id: string, eventData: any) {
+    try {
+      const response = await api.patch(`/events/${id}`, eventData);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to update event';
+      throw new Error(message);
+    }
   }
 };
+
