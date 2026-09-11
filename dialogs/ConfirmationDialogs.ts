@@ -40,3 +40,13 @@ export const showDeleteAccountDialog = (onConfirm: () => void) => {
     ]
   );
 };
+
+export const showUpcomingFeatureDialog = (
+  title = 'Upcoming Feature',
+  message = 'This feature will be available in an upcoming update!'
+) => {
+  Alert.alert(`✨ ${title}`, message, [
+    { text: 'Got it!', style: 'default' }
+  ]);
+};
+

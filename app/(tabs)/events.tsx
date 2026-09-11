@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Act
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EventService } from '@/services/event.service';
+import { showUpcomingFeatureDialog } from '@/dialogs/ConfirmationDialogs';
 
 export default function EventsScreen() {
   const insets = useSafeAreaInsets();
@@ -65,7 +66,10 @@ export default function EventsScreen() {
         </Text>
         <View style={styles.cardFooter}>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity 
+            style={styles.actionBtn}
+            onPress={() => showUpcomingFeatureDialog('Manage Event', `Event management features for "${event.title}" will be available in an upcoming update.`)}
+          >
             <Text style={styles.actionBtnText}>Manage →</Text>
           </TouchableOpacity>
         </View>
