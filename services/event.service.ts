@@ -89,6 +89,26 @@ export const EventService = {
       const message = error.response?.data?.message || error.message || 'Failed to update event';
       throw new Error(message);
     }
+  },
+
+  async rsvp(id: string) {
+    try {
+      const response = await api.post(`/events/${id}/rsvp`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to RSVP for event';
+      throw new Error(message);
+    }
+  },
+
+  async cancelRsvp(id: string) {
+    try {
+      const response = await api.delete(`/events/${id}/rsvp`);
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to cancel RSVP';
+      throw new Error(message);
+    }
   }
 };
 

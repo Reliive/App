@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +10,9 @@ import {
   Dimensions,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserService } from '@/services/user.service';
@@ -26,6 +28,7 @@ const FALLBACK_CLUBS = [
 ];
 
 export default function HomeScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
@@ -48,11 +51,59 @@ export default function HomeScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData().finally(() => setLoading(false));
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData().finally(() => setLoading(false));
+    }, [fetchData])
+  );
 
   const { refreshing, onRefresh } = usePullToRefresh(fetchData);
+
+  const handleQuickRsvp = (event: any) => {
+    if (event.user_rsvp_status) {
+      Alert.alert(
+        'Cancel RSVP',
+        `Are you sure you want to cancel your RSVP for "${event.title}"?`,
+        [
+          { text: 'No', style: 'cancel' },
+          {
+            text: 'Yes, Cancel',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await EventService.cancelRsvp(event.id);
+                Alert.alert('Cancelled', `Your RSVP for "${event.title}" has been cancelled.`);
+                fetchData();
+              } catch (err: any) {
+                Alert.alert('Error', err.message || 'Could not cancel RSVP.');
+              }
+            }
+          }
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Confirm RSVP',
+        `Are you sure you want to RSVP for "${event.title}"?`,
+        [
+          { text: 'No', style: 'cancel' },
+          {
+            text: 'Yes, I\'ll attend!',
+            style: 'default',
+            onPress: async () => {
+              try {
+                await EventService.rsvp(event.id);
+                Alert.alert('🎉 RSVP Confirmed!', `You're on the guest list for "${event.title}".`);
+                fetchData();
+              } catch (err: any) {
+                Alert.alert('RSVP Failed', err.message || 'Could not complete RSVP.');
+              }
+            }
+          }
+        ]
+      );
+    }
+  };
 
   const clubs = user?.clubs?.length > 0 ? user.clubs : FALLBACK_CLUBS;
 
@@ -87,7 +138,7 @@ export default function HomeScreen() {
             <TouchableOpacity style={styles.iconButton}>
               <MaterialCommunityIcons name="bell-outline" size={24} color="#111827" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/settings' as any)}>
               <MaterialCommunityIcons name="cog-outline" size={24} color="#111827" />
             </TouchableOpacity>
           </View>
@@ -97,11 +148,11 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>YOUR CLUBS</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/explore' as any)}>
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.clubsContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.clubsContainer}>
             {clubs.map((club: any, index: number) => {
               const colors = ['#EEF2FF', '#FEF3C7', '#ECFDF5', '#FDF2F8'];
               const bgColor = club.color || colors[index % colors.length];
@@ -124,7 +175,11 @@ export default function HomeScreen() {
             const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
             return (
-              <TouchableOpacity key={event.id} style={styles.eventCard}>
+              <TouchableOpacity
+                key={event.id}
+                style={styles.eventCard}
+                onPress={() => router.push(`/events/${event.id}` as any)}
+              >
                 <View style={styles.eventInfo}>
                   <Text style={styles.eventTitle}>📅 {event.title}</Text>
                   <Text style={styles.eventDetails}>
@@ -135,8 +190,11 @@ export default function HomeScreen() {
                   </Text>
                 </View>
                 <View style={styles.eventAction}>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, event.user_rsvp_status && styles.actionButtonActive]}
+                    onPress={() => handleQuickRsvp(event)}
+                  >
+                    <Text style={[styles.actionButtonText, event.user_rsvp_status && styles.actionButtonTextActive]}>
                       {event.user_rsvp_status ? 'Going' : (event.event_type === 'paid' ? 'Book →' : 'RSVP →')}
                     </Text>
                   </TouchableOpacity>
@@ -152,7 +210,10 @@ export default function HomeScreen() {
         {featuredEvents.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>FEATURED EXPERIENCE</Text>
-            <TouchableOpacity style={styles.featuredCard}>
+            <TouchableOpacity
+              style={styles.featuredCard}
+              onPress={() => router.push(`/events/${featuredEvents[0].id}` as any)}
+            >
               <Image
                 source={featuredEvents[0].images?.[0] ? { uri: featuredEvents[0].images[0] } : require('@/assets/images/hampi.png')}
                 style={styles.featuredImage}
@@ -279,10 +340,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
   },
+  actionButtonActive: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
   actionButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  actionButtonTextActive: {
+    color: '#059669',
   },
   featuredCard: {
     marginTop: 12,

@@ -33,6 +33,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]/manage" options={{ headerShown: false }} />
+        <Stack.Screen name="events/[id]/index" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
