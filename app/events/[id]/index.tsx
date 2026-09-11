@@ -55,7 +55,7 @@ export default function EventDetailsScreen() {
   const handleRsvpPress = () => {
     if (!event) return;
 
-    const isRsvped = !!event.user_rsvp;
+    const isRsvped = !!(event.user_rsvp && (event.user_rsvp.status === 'confirmed' || event.user_rsvp.status === 'waitlist'));
 
     if (isRsvped) {
       Alert.alert(
@@ -142,7 +142,7 @@ export default function EventDetailsScreen() {
     : 'Time TBD';
 
   const isUserHost = false; // Host uses manage view
-  const isRsvped = !!event.user_rsvp;
+  const isRsvped = !!(event.user_rsvp && (event.user_rsvp.status === 'confirmed' || event.user_rsvp.status === 'waitlist'));
   const priceDisplay = event.price > 0 ? `₹${event.price}` : 'FREE';
 
   return (

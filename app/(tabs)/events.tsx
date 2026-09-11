@@ -56,7 +56,10 @@ export default function EventsScreen() {
         </Text>
         <View style={styles.cardFooter}>
           <Text style={styles.statusText}>{statusText}{event.price > 0 ? ` · ₹${event.price}` : ''}</Text>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity 
+            style={styles.actionBtn}
+            onPress={() => router.push(`/events/${event.id}` as any)}
+          >
             <Text style={styles.actionBtnText}>View →</Text>
           </TouchableOpacity>
         </View>

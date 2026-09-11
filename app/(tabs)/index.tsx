@@ -60,7 +60,8 @@ export default function HomeScreen() {
   const { refreshing, onRefresh } = usePullToRefresh(fetchData);
 
   const handleQuickRsvp = (event: any) => {
-    if (event.user_rsvp_status) {
+    const isRsvped = event.user_rsvp_status === 'confirmed' || event.user_rsvp_status === 'waitlist';
+    if (isRsvped) {
       Alert.alert(
         'Cancel RSVP',
         `Are you sure you want to cancel your RSVP for "${event.title}"?`,
@@ -173,6 +174,7 @@ export default function HomeScreen() {
             const date = new Date(event.starts_at);
             const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const isGoing = event.user_rsvp_status === 'confirmed' || event.user_rsvp_status === 'waitlist';
             
             return (
               <TouchableOpacity
@@ -191,11 +193,11 @@ export default function HomeScreen() {
                 </View>
                 <View style={styles.eventAction}>
                   <TouchableOpacity
-                    style={[styles.actionButton, event.user_rsvp_status && styles.actionButtonActive]}
+                    style={[styles.actionButton, isGoing && styles.actionButtonActive]}
                     onPress={() => handleQuickRsvp(event)}
                   >
-                    <Text style={[styles.actionButtonText, event.user_rsvp_status && styles.actionButtonTextActive]}>
-                      {event.user_rsvp_status ? 'Going' : (event.event_type === 'paid' ? 'Book →' : 'RSVP →')}
+                    <Text style={[styles.actionButtonText, isGoing && styles.actionButtonTextActive]}>
+                      {isGoing ? 'Going' : (event.event_type === 'paid' ? 'Book →' : 'RSVP →')}
                     </Text>
                   </TouchableOpacity>
                 </View>
