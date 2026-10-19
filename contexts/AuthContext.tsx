@@ -1,8 +1,40 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { setAuthToken } from '@/services/auth.service';
 
 const TOKEN_KEY = 'reliive_jwt_token';
+
+// Cross-platform token storage (localStorage for Web, SecureStore for Native iOS/Android)
+const tokenStorage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return window.localStorage.getItem(key);
+      }
+      return null;
+    }
+    return await SecureStore.getItemAsync(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(key, value);
+      }
+      return;
+    }
+    await SecureStore.setItemAsync(key, value);
+  },
+  async deleteItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem(key);
+      }
+      return;
+    }
+    await SecureStore.deleteItemAsync(key);
+  },
+};
 
 interface AuthContextType {
   signIn: (token: string) => Promise<void>;
@@ -26,10 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load the token from secure storage when the app starts
+    // Load the token from storage when the app starts
     const loadSession = async () => {
       try {
-        const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+        const storedToken = await tokenStorage.getItem(TOKEN_KEY);
         if (storedToken) {
           setSession(storedToken);
           setAuthToken(storedToken); // Update axios headers
@@ -46,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (token: string) => {
     try {
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      await tokenStorage.setItem(TOKEN_KEY, token);
       setSession(token);
       setAuthToken(token); // Update axios headers
     } catch (error) {
@@ -57,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await tokenStorage.deleteItem(TOKEN_KEY);
       setSession(null);
       setAuthToken(null); // Clear axios headers
     } catch (error) {
