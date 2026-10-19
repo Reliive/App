@@ -108,6 +108,19 @@ export default function HostScreen() {
     return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
+  const formatIsoDate = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatIsoTime = (d: Date) => {
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <View style={styles.safeArea}>
       <KeyboardAvoidingView 
@@ -157,39 +170,93 @@ export default function HostScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Date & Time</Text>
-              <View style={styles.dateTimeRow}>
-                <TouchableOpacity 
-                  style={styles.dateTimeButton} 
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
-                </TouchableOpacity>
+              {Platform.OS === 'web' ? (
+                <View style={styles.dateTimeRow}>
+                  <input
+                    type="date"
+                    value={formatIsoDate(date)}
+                    min={formatIsoDate(new Date())}
+                    onChange={(e: any) => {
+                      if (e.target.value) {
+                        const [y, m, d] = e.target.value.split('-').map(Number);
+                        const newDate = new Date(date);
+                        newDate.setFullYear(y, m - 1, d);
+                        setDate(newDate);
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      border: '1px solid #D1D5DB',
+                      borderRadius: 8,
+                      padding: '11px 12px',
+                      backgroundColor: '#FFFFFF',
+                      fontSize: 15,
+                      color: '#111827',
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                    }}
+                  />
+                  <input
+                    type="time"
+                    value={formatIsoTime(date)}
+                    onChange={(e: any) => {
+                      if (e.target.value) {
+                        const [h, m] = e.target.value.split(':').map(Number);
+                        const newDate = new Date(date);
+                        newDate.setHours(h, m);
+                        setDate(newDate);
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      border: '1px solid #D1D5DB',
+                      borderRadius: 8,
+                      padding: '11px 12px',
+                      backgroundColor: '#FFFFFF',
+                      fontSize: 15,
+                      color: '#111827',
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                    }}
+                  />
+                </View>
+              ) : (
+                <>
+                  <View style={styles.dateTimeRow}>
+                    <TouchableOpacity 
+                      style={styles.dateTimeButton} 
+                      onPress={() => setShowDatePicker(true)}
+                    >
+                      <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity 
-                  style={styles.dateTimeButton} 
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
-                </TouchableOpacity>
-              </View>
+                    <TouchableOpacity 
+                      style={styles.dateTimeButton} 
+                      onPress={() => setShowTimePicker(true)}
+                    >
+                      <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
+                    </TouchableOpacity>
+                  </View>
 
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="default"
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                />
-              )}
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={date}
+                      mode="date"
+                      display="default"
+                      onChange={handleDateChange}
+                      minimumDate={new Date()}
+                    />
+                  )}
 
-              {showTimePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="time"
-                  display="default"
-                  onChange={handleTimeChange}
-                />
+                  {showTimePicker && (
+                    <DateTimePicker
+                      value={date}
+                      mode="time"
+                      display="default"
+                      onChange={handleTimeChange}
+                    />
+                  )}
+                </>
               )}
             </View>
 
