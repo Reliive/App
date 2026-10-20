@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
-import { ClubService, Club } from '@/services/club.service';
+import { ClubService } from '@/services/club.service';
 import { EventService } from '@/services/event.service';
 import { CreateEventInput } from '@/types/event';
 
@@ -79,15 +79,10 @@ export default function PreviewEventScreen() {
       };
 
       await EventService.createEvent(payload);
-      Alert.alert(
-        'Success! 🎉',
-        'Your event has been published successfully.',
-        [
-          { text: 'Awesome', onPress: () => router.push('/(tabs)/host') }
-        ]
-      );
-    } catch (error: any) {
-      Alert.alert('Publish Failed', error.message || 'Something went wrong.');
+      router.replace('/events');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong.';
+      Alert.alert('Publish Failed', message);
     } finally {
       setIsPublishing(false);
     }
