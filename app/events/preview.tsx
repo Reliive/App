@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { ClubService, Club } from '@/services/club.service';
 import { EventService } from '@/services/event.service';
+import { CreateEventInput } from '@/types/event';
 
 export default function PreviewEventScreen() {
   const router = useRouter();
@@ -59,18 +60,22 @@ export default function PreviewEventScreen() {
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
+      const parsedCapacity = Number.parseInt(String(capacity), 10);
+      if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1) {
+        throw new Error('Capacity must be a positive whole number.');
+      }
+
       // Create payload matching backend expected format
-      const payload = {
-        title: title,
-        description: description,
-        club_id: clubId,
-        event_type: event_type,
-        starts_at: starts_at,
-        location_name: location,
-        capacity: parseInt(capacity) || 10,
-        accessibility_notes: accessibility_notes,
-        // Optional placeholders for future
-        images: parsedPhotos // NOTE: In a real app, these URIs would be uploaded to storage first.
+      const payload: CreateEventInput = {
+        title: title ? String(title).trim() : '',
+        description: description ? String(description).trim() : '',
+        club_id: clubId ? String(clubId) : undefined,
+        event_type: event_type || 'free',
+        starts_at: String(starts_at),
+        location_name: location ? String(location) : '',
+        capacity: parsedCapacity,
+        accessibility_notes: accessibility_notes || '',
+        images: parsedPhotos || []
       };
 
       await EventService.createEvent(payload);

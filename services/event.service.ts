@@ -1,4 +1,10 @@
 import { api } from './auth.service';
+import { CreateEventInput } from '@/types/event';
+
+interface EventValidationError {
+  field: string;
+  message: string;
+}
 
 export const EventService = {
   async listEvents(params?: any) {
@@ -31,12 +37,18 @@ export const EventService = {
     }
   },
 
-  async createEvent(eventData: any) {
+  async createEvent(eventData: CreateEventInput) {
     try {
       const response = await api.post('/events', eventData);
       return response.data;
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Failed to create event';
+      const responseData = error.response?.data;
+      let message = responseData?.message || error.message || 'Failed to create event';
+      if (responseData?.errors && Array.isArray(responseData.errors)) {
+        const validationErrors = responseData.errors as EventValidationError[];
+        const errorDetails = validationErrors.map(({ field, message: detail }) => `${field}: ${detail}`).join(', ');
+        message = `${message}: ${errorDetails}`;
+      }
       throw new Error(message);
     }
   },
@@ -111,4 +123,3 @@ export const EventService = {
     }
   }
 };
-
