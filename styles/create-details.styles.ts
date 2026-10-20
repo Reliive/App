@@ -1,0 +1,55 @@
+import { Platform, StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1 },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+  },
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: '#111827' },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  section: { marginBottom: 24 },
+  label: { fontSize: 15, fontWeight: '600', color: '#374151', marginBottom: 8 },
+  required: { color: '#DC2626' },
+  errorText: { color: '#DC2626', fontSize: 13, marginTop: 6 },
+  helperText: { color: '#6B7280', fontSize: 12 },
+  descriptionMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
+  inputError: { borderColor: '#DC2626' },
+  textAreaContainer: {
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, backgroundColor: '#F9FAFB',
+    minHeight: 120, padding: 12,
+  },
+  textArea: { fontSize: 16, color: '#111827', flex: 1 },
+  photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  photoContainer: { width: 80, height: 80, borderRadius: 8, position: 'relative' },
+  photo: { width: '100%', height: '100%', borderRadius: 8 },
+  removePhotoBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: '#FFFFFF', borderRadius: 10 },
+  addPhotoBtn: {
+    width: 80, height: 80, borderWidth: 1, borderColor: '#D1D5DB', borderStyle: 'dashed',
+    borderRadius: 8, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FAFB',
+  },
+  addPhotoText: { fontSize: 12, color: '#6B7280', marginTop: 4 },
+  stepperContainer: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 8, backgroundColor: '#F9FAFB',
+  },
+  stepperBtn: { padding: 12, backgroundColor: '#EEF2FF', borderRadius: 8 },
+  stepperValue: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  toggleContainer: {
+    flexDirection: 'row', borderWidth: 1, borderColor: '#E5E7EB',
+    borderRadius: 12, overflow: 'hidden', backgroundColor: '#F9FAFB',
+  },
+  toggleBtn: { flex: 1, paddingVertical: 14, alignItems: 'center' },
+  toggleBtnActive: { backgroundColor: '#4F46E5' },
+  toggleText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
+  toggleTextActive: { color: '#FFFFFF' },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  checkboxLabel: { marginLeft: 10, fontSize: 15, color: '#374151' },
+  footer: {
+    padding: 20, paddingBottom: Platform.OS === 'ios' ? 0 : 20,
+    borderTopWidth: 1, borderTopColor: '#F3F4F6', backgroundColor: '#FFFFFF',
+  },
+  nextButton: { width: '100%' },
+});

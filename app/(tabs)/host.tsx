@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { Text, View, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { ClubService } from '@/services/club.service';
+import { EventDateTimePicker } from '@/components/events/EventDateTimePicker';
+import { styles } from '@/styles/host.styles';
 
 const EVENT_TEMPLATES = [
   { id: 'coffee', label: 'Coffee', icon: '☕' },
@@ -31,29 +31,18 @@ export default function HostScreen() {
   
   // State
   const [selectedTemplate, setSelectedTemplate] = useState('coffee');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState('Sunday Coffee');
   
   // Date & Time
   const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
   
   // Selects
   const [location, setLocation] = useState('');
   const [clubId, setClubId] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
   // Data
   const [clubs, setClubs] = useState<{label: string, value: string}[]>([]);
-
-  useEffect(() => {
-    // Set default title based on template
-    const template = EVENT_TEMPLATES.find(t => t.id === selectedTemplate);
-    if (template && title === '') {
-      setTitle(`Sunday ${template.label}`);
-    } else if (template && EVENT_TEMPLATES.some(t => `Sunday ${t.label}` === title)) {
-      setTitle(`Sunday ${template.label}`);
-    }
-  }, [selectedTemplate]);
 
   useEffect(() => {
     const fetchClubs = async () => {
@@ -72,19 +61,18 @@ export default function HostScreen() {
     fetchClubs();
   }, []);
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) setDate(selectedDate);
-  };
-
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(Platform.OS === 'ios');
-    if (selectedTime) setDate(selectedTime);
-  };
-
   const handleNext = () => {
-    if (!title || !location || !clubId) {
-      Alert.alert('Missing Details', 'Please fill in all required fields.');
+    const errors: Record<string, string> = {};
+    if (!title.trim()) errors.title = 'Title is required.';
+    if (!location) errors.location = 'Location is required.';
+    if (!clubId) errors.clubId = 'Club is required.';
+    if (!selectedTemplate) errors.template = 'Category is required.';
+    if (!date || Number.isNaN(date.getTime())) {
+      errors.date = 'Date and time are required.';
+    }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -100,27 +88,6 @@ export default function HostScreen() {
     });
   };
 
-  const formatDate = (dateObj: Date) => {
-    return dateObj.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
-  };
-  
-  const formatTime = (dateObj: Date) => {
-    return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-  };
-
-  const formatIsoDate = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const formatIsoTime = (d: Date) => {
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
   return (
     <View style={styles.safeArea}>
       <KeyboardAvoidingView 
@@ -134,7 +101,7 @@ export default function HostScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>What kind of event is this?</Text>
+            <Text style={styles.sectionTitle}>What kind of event is this?<Text style={styles.required}>*</Text></Text>
             
             <View style={styles.templatesGrid}>
               {EVENT_TEMPLATES.map((template) => {
@@ -143,7 +110,10 @@ export default function HostScreen() {
                   <TouchableOpacity
                     key={template.id}
                     style={[styles.templateCard, isSelected && styles.templateCardSelected]}
-                    onPress={() => setSelectedTemplate(template.id)}
+                    onPress={() => {
+                      setSelectedTemplate(template.id);
+                      if (title.startsWith('Sunday ')) setTitle(`Sunday ${template.label}`);
+                    }}
                     activeOpacity={0.7}
                   >
                     <Text style={styles.templateIcon}>{template.icon}</Text>
@@ -154,130 +124,51 @@ export default function HostScreen() {
                 );
               })}
             </View>
+            {fieldErrors.template ? <Text style={styles.errorText}>{fieldErrors.template}</Text> : null}
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionHeader}>DETAILS</Text>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Title</Text>
+              <Text style={styles.label}>Title<Text style={styles.required}>*</Text></Text>
               <Input
                 placeholder="Sunday Book Reading..."
                 value={title}
                 onChangeText={setTitle}
               />
+              {fieldErrors.title ? <Text style={styles.errorText}>{fieldErrors.title}</Text> : null}
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Date & Time</Text>
-              {Platform.OS === 'web' ? (
-                <View style={styles.dateTimeRow}>
-                  <input
-                    type="date"
-                    value={formatIsoDate(date)}
-                    min={formatIsoDate(new Date())}
-                    onChange={(e: any) => {
-                      if (e.target.value) {
-                        const [y, m, d] = e.target.value.split('-').map(Number);
-                        const newDate = new Date(date);
-                        newDate.setFullYear(y, m - 1, d);
-                        setDate(newDate);
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      border: '1px solid #D1D5DB',
-                      borderRadius: 8,
-                      padding: '11px 12px',
-                      backgroundColor: '#FFFFFF',
-                      fontSize: 15,
-                      color: '#111827',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                    }}
-                  />
-                  <input
-                    type="time"
-                    value={formatIsoTime(date)}
-                    onChange={(e: any) => {
-                      if (e.target.value) {
-                        const [h, m] = e.target.value.split(':').map(Number);
-                        const newDate = new Date(date);
-                        newDate.setHours(h, m);
-                        setDate(newDate);
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      border: '1px solid #D1D5DB',
-                      borderRadius: 8,
-                      padding: '11px 12px',
-                      backgroundColor: '#FFFFFF',
-                      fontSize: 15,
-                      color: '#111827',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                    }}
-                  />
-                </View>
-              ) : (
-                <>
-                  <View style={styles.dateTimeRow}>
-                    <TouchableOpacity 
-                      style={styles.dateTimeButton} 
-                      onPress={() => setShowDatePicker(true)}
-                    >
-                      <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                      style={styles.dateTimeButton} 
-                      onPress={() => setShowTimePicker(true)}
-                    >
-                      <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {showDatePicker && (
-                    <DateTimePicker
-                      value={date}
-                      mode="date"
-                      display="default"
-                      onChange={handleDateChange}
-                      minimumDate={new Date()}
-                    />
-                  )}
-
-                  {showTimePicker && (
-                    <DateTimePicker
-                      value={date}
-                      mode="time"
-                      display="default"
-                      onChange={handleTimeChange}
-                    />
-                  )}
-                </>
-              )}
+              <Text style={styles.label}>Date & Time<Text style={styles.required}>*</Text></Text>
+              <EventDateTimePicker
+                selectedDate={date}
+                onDateChange={setDate}
+                error={fieldErrors.date}
+              />
             </View>
 
             <View style={styles.inputGroup}>
               <Select
-                label="Location"
+                label="Location *"
                 options={LOCATIONS}
                 value={location}
                 onValueChange={setLocation}
                 placeholder="📍 Select Location"
               />
+              {fieldErrors.location ? <Text style={styles.errorText}>{fieldErrors.location}</Text> : null}
             </View>
 
             <View style={styles.inputGroup}>
               <Select
-                label="Club"
+                label="Club *"
                 options={clubs}
                 value={clubId}
                 onValueChange={setClubId}
                 placeholder="📚 Select Club"
               />
+              {fieldErrors.clubId ? <Text style={styles.errorText}>{fieldErrors.clubId}</Text> : null}
             </View>
           </View>
         </ScrollView>
@@ -294,118 +185,3 @@ export default function HostScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 16,
-  },
-  sectionHeader: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-    letterSpacing: 1,
-    marginBottom: 16,
-  },
-  templatesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  templateCard: {
-    width: '48%',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 12,
-  },
-  templateCardSelected: {
-    backgroundColor: '#EEF2FF',
-    borderColor: '#6366F1',
-  },
-  templateIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  templateLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#374151',
-  },
-  templateLabelSelected: {
-    color: '#4F46E5',
-    fontWeight: '600',
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 6,
-  },
-  dateTimeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  dateTimeButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-  },
-  dateTimeText: {
-    fontSize: 16,
-    color: '#111827',
-  },
-  footer: {
-    padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 0 : 20,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    backgroundColor: '#FFFFFF',
-  },
-  nextButton: {
-    width: '100%',
-  },
-});

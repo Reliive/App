@@ -38,6 +38,8 @@ function RootLayoutNav() {
         <Stack.Screen name="settings/terms" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]/manage" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]/index" options={{ headerShown: false }} />
+        <Stack.Screen name="events/create-details" options={{ headerShown: false }} />
+        <Stack.Screen name="events/preview" options={{ headerShown: false }} />
         <Stack.Screen name="notifications/index" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>

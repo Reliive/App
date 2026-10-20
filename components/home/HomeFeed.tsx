@@ -74,9 +74,6 @@ export function HomeFeed({
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>YOUR CLUBS</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} accessibilityRole="button" accessibilityLabel="See all clubs">
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.clubsContainer}>
             {clubs.map((club, index) => (
@@ -89,7 +86,12 @@ export function HomeFeed({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>UPCOMING FOR YOU</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>UPCOMING FOR YOU</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} accessibilityRole="button" accessibilityLabel="Explore all upcoming events">
+              <Text style={styles.seeAllText}>See All</Text>
+            </TouchableOpacity>
+          </View>
           {upcomingEvents.length > 0 ? upcomingEvents.map((event) => {
             const date = new Date(event.starts_at);
             const isGoing = event.user_rsvp_status === 'confirmed' || event.user_rsvp_status === 'waitlist';
